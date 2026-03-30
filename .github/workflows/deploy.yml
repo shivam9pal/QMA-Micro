@@ -21,6 +21,7 @@ jobs:
             echo "Connected to EC2"
             whoami
             hostname
+            java -version
 
             cd ~/QMA-Micro
 
@@ -29,38 +30,75 @@ jobs:
             git reset --hard origin/main
             git clean -fd
 
-            # ✅ ADD THIS BLOCK HERE 👇
             echo "Stopping old Java services..."
-            pkill -f java || true
+            pkill -f ServiceRegistry || true
+            pkill -f QuantityMeasurementApp || true
+            pkill -f ApiGateway || true
             sleep 5
 
             echo "Fixing mvnw permissions..."
             find . -name "mvnw" -exec chmod +x {} \;
 
             echo "Cleaning old builds..."
-            find . -name "target" -type d -exec rm -rf {} +
+            find . -name "target" -type d -exec rm -rf {} + 2>/dev/null || true
 
             echo "Creating logs directory..."
             mkdir -p ~/logs
 
+            echo "================================"
             echo "Building and starting services..."
+            echo "================================"
 
-            # ServiceRegistry
+            # ServiceRegistry (Port 8761)
+            echo ">>> Building ServiceRegistry..."
             cd ServiceRegistry
-            ./mvnw clean package -DskipTests
-            nohup java -jar target/*.jar > ~/logs/service-registry.log 2>&1 &
+            ./mvnw clean package -DskipTests -q
+            if [ -f target/*.jar ]; then
+              echo "Starting ServiceRegistry on port 8761..."
+              nohup java -jar target/*.jar --server.port=8761 > ~/logs/service-registry.log 2>&1 &
+              echo "ServiceRegistry PID: $!"
+            else
+              echo "ERROR: ServiceRegistry JAR not found!"
+              exit 1
+            fi
             cd ..
             sleep 10
 
-            # QuantityMeasurementApp
+            # QuantityMeasurementApp (Port 8081)
+            echo ">>> Building QuantityMeasurementApp..."
             cd QuantityMeasurementApp
-            ./mvnw clean package -DskipTests
-            nohup java -jar target/*.jar > ~/logs/quantity-app.log 2>&1 &
+            ./mvnw clean package -DskipTests -q
+            if [ -f target/*.jar ]; then
+              echo "Starting QuantityMeasurementApp on port 8081..."
+              nohup java -jar target/*.jar --server.port=8081 > ~/logs/quantity-app.log 2>&1 &
+              echo "QuantityMeasurementApp PID: $!"
+            else
+              echo "ERROR: QuantityMeasurementApp JAR not found!"
+              exit 1
+            fi
             cd ..
             sleep 5
 
-            # ApiGateway
+            # ApiGateway (Port 8080)
+            echo ">>> Building ApiGateway..."
             cd ApiGateway
-            ./mvnw clean package -DskipTests
-            nohup java -jar target/*.jar > ~/logs/api-gateway.log 2>&1 &
+            ./mvnw clean package -DskipTests -q
+            if [ -f target/*.jar ]; then
+              echo "Starting ApiGateway on port 8080..."
+              nohup java -jar target/*.jar --server.port=8080 > ~/logs/api-gateway.log 2>&1 &
+              echo "ApiGateway PID: $!"
+            else
+              echo "ERROR: ApiGateway JAR not found!"
+              exit 1
+            fi
             cd ..
+
+            sleep 5
+            echo "================================"
+            echo "✅ All services deployed!"
+            echo "================================"
+            echo "Service Status:"
+            ps aux | grep java | grep -v grep
+            echo ""
+            echo "Log files:"
+            ls -lh ~/logs/
