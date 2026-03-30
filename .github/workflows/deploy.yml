@@ -14,7 +14,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}   # ubuntu
+          username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
@@ -30,10 +30,14 @@ jobs:
             git reset --hard origin/main
             git clean -fd
 
+            echo "================================"
             echo "Stopping old Java services..."
-            pkill -f ServiceRegistry || true
-            pkill -f QuantityMeasurementApp || true
-            pkill -f ApiGateway || true
+            echo "================================"
+
+            ps aux | grep ServiceRegistry | grep -v grep | awk '{print $2}' | xargs -r kill -9
+            ps aux | grep QuantityMeasurementApp | grep -v grep | awk '{print $2}' | xargs -r kill -9
+            ps aux | grep ApiGateway | grep -v grep | awk '{print $2}' | xargs -r kill -9
+
             sleep 5
 
             echo "Fixing mvnw permissions..."
@@ -49,56 +53,69 @@ jobs:
             echo "Building and starting services..."
             echo "================================"
 
-            # ServiceRegistry (Port 8761)
+            # =========================
+            # ServiceRegistry (8761)
+            # =========================
             echo ">>> Building ServiceRegistry..."
             cd ServiceRegistry
-            ./mvnw clean package -DskipTests -q
-            if [ -f target/*.jar ]; then
+            ./mvnw clean package -DskipTests
+            if ls target/*.jar 1> /dev/null 2>&1; then
               echo "Starting ServiceRegistry on port 8761..."
               nohup java -jar target/*.jar --server.port=8761 > ~/logs/service-registry.log 2>&1 &
               echo "ServiceRegistry PID: $!"
             else
-              echo "ERROR: ServiceRegistry JAR not found!"
+              echo "ERROR: ServiceRegistry build failed!"
               exit 1
             fi
             cd ..
             sleep 10
 
-            # QuantityMeasurementApp (Port 8081)
+            # =========================
+            # QuantityMeasurementApp (8081)
+            # =========================
             echo ">>> Building QuantityMeasurementApp..."
             cd QuantityMeasurementApp
-            ./mvnw clean package -DskipTests -q
-            if [ -f target/*.jar ]; then
+            ./mvnw clean package -DskipTests
+            if ls target/*.jar 1> /dev/null 2>&1; then
               echo "Starting QuantityMeasurementApp on port 8081..."
               nohup java -jar target/*.jar --server.port=8081 > ~/logs/quantity-app.log 2>&1 &
               echo "QuantityMeasurementApp PID: $!"
             else
-              echo "ERROR: QuantityMeasurementApp JAR not found!"
+              echo "ERROR: QuantityMeasurementApp build failed!"
               exit 1
             fi
             cd ..
             sleep 5
 
-            # ApiGateway (Port 8080)
+            # =========================
+            # ApiGateway (9090) ✅ FIXED
+            # =========================
             echo ">>> Building ApiGateway..."
             cd ApiGateway
-            ./mvnw clean package -DskipTests -q
-            if [ -f target/*.jar ]; then
-              echo "Starting ApiGateway on port 8080..."
-              nohup java -jar target/*.jar --server.port=8080 > ~/logs/api-gateway.log 2>&1 &
+            ./mvnw clean package -DskipTests
+            if ls target/*.jar 1> /dev/null 2>&1; then
+              echo "Starting ApiGateway on port 9090..."
+              nohup java -jar target/*.jar --server.port=9090 > ~/logs/api-gateway.log 2>&1 &
               echo "ApiGateway PID: $!"
             else
-              echo "ERROR: ApiGateway JAR not found!"
+              echo "ERROR: ApiGateway build failed!"
               exit 1
             fi
             cd ..
 
             sleep 5
+
             echo "================================"
-            echo "✅ All services deployed!"
+            echo "✅ Deployment completed successfully!"
             echo "================================"
-            echo "Service Status:"
+
+            echo "Running services:"
             ps aux | grep java | grep -v grep
+
+            echo ""
+            echo "Listening ports:"
+            ss -tulnp | grep -E '8761|8081|9090'
+
             echo ""
             echo "Log files:"
             ls -lh ~/logs/
