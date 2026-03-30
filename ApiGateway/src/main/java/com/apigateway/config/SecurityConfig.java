@@ -28,7 +28,9 @@ public class SecurityConfig {
                 "http://127.0.0.1:5173",
                 "http://13.206.8.23",
                 "http://13.206.8.23:3000",
-                "http://13.206.8.23:5173"
+                "http://13.206.8.23:5173",
+                "https://quantity-measurement-app-frontend-green.vercel.app",
+                "https://quantity-measurement-app-frontend-ppnss4msx.vercel.app"
         ));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         corsConfig.setAllowedHeaders(Arrays.asList("*"));
