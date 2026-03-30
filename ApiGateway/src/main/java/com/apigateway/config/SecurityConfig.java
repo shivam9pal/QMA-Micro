@@ -29,6 +29,7 @@ public class SecurityConfig {
                 "http://13.206.8.23",
                 "http://13.206.8.23:3000",
                 "http://13.206.8.23:5173",
+                "https://smartmeeter.online",
                 "https://www.smartmeeter.online",
                 "https://quantity-measurement-app-frontend-green.vercel.app",
                 "https://quantity-measurement-app-frontend-ppnss4msx.vercel.app"
