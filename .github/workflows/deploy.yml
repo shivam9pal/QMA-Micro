@@ -22,32 +22,45 @@ jobs:
             whoami
             hostname
 
-            cd ~/QMA-Micro   # 👈 your new repo folder name
+            cd ~/QMA-Micro
+
+            echo "Updating code from main..."
+            git fetch origin
+            git reset --hard origin/main
+            git clean -fd
+
+            # ✅ ADD THIS BLOCK HERE 👇
+            echo "Stopping old Java services..."
+            pkill -f java || true
+            sleep 5
 
             echo "Fixing mvnw permissions..."
             find . -name "mvnw" -exec chmod +x {} \;
-            
+
             echo "Cleaning old builds..."
             find . -name "target" -type d -exec rm -rf {} +
-            
+
+            echo "Creating logs directory..."
+            mkdir -p ~/logs
+
             echo "Building and starting services..."
-            
+
             # ServiceRegistry
             cd ServiceRegistry
             ./mvnw clean package -DskipTests
-            nohup java -jar target/*.jar  > ~/logs/service-registry.log 2>&1 &
+            nohup java -jar target/*.jar > ~/logs/service-registry.log 2>&1 &
             cd ..
             sleep 10
-            
+
             # QuantityMeasurementApp
             cd QuantityMeasurementApp
             ./mvnw clean package -DskipTests
-            nohup java -jar target/*.jar  > ~/logs/quantity-app.log 2>&1 &
+            nohup java -jar target/*.jar > ~/logs/quantity-app.log 2>&1 &
             cd ..
             sleep 5
-            
+
             # ApiGateway
             cd ApiGateway
             ./mvnw clean package -DskipTests
-            nohup java -jar target/*.jar  > ~/logs/api-gateway.log 2>&1 &
+            nohup java -jar target/*.jar > ~/logs/api-gateway.log 2>&1 &
             cd ..
