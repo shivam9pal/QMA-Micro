@@ -14,7 +14,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}   # should be 'ubuntu'
+          username: ${{ secrets.EC2_USER }}   # ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
@@ -22,19 +22,11 @@ jobs:
             whoami
             hostname
 
-            cd ~
+            cd ~/QMA-Micro   # 👈 your new repo folder name
 
-            # Clone repo if not exists
-            if [ ! -d "QuantityMeasurementApp-Micro" ]; then
-              echo "Cloning repository..."
-              git clone -b master https://github.com/shivam9pal/QuantityMeasurementApp-Micro.git
-            fi
-
-            cd ~/QuantityMeasurementApp-Micro
-
-            echo "Updating code..."
+            echo "Updating code from main..."
             git fetch origin
-            git reset --hard origin/master
+            git reset --hard origin/main
             git clean -fd
 
             echo "Creating logs directory..."
