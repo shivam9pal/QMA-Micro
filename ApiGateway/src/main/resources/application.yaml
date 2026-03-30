@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://QUANTITY-SERVICE
+          predicates:
+            - Path=/auth/**
+        - id: quantity-service
+          uri: lb://QUANTITY-SERVICE
+          predicates:
+            - Path=/api/**
+
+server:
+  port: 9090
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+jwt-Secret-Key: MySuperStrongSecretKeyThatIsAtLeast32CharsLong!!
+debug: true

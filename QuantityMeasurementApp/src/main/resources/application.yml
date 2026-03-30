@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: QUANTITY-SERVICE
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/clinic
+    username: postgres
+    password: Shivam@12345
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+jwt-Secret-Key: MySuperStrongSecretKeyThatIsAtLeast32CharsLong!!
+server:
+  port: 8081
+
+debug: true

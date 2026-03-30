@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: SERVICE-REGISTRY
+
+eureka:
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 1000
+  instance:
+    prefer-ip-address: true
+
+server:
+  port: 8761
+
