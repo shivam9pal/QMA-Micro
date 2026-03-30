@@ -3,6 +3,8 @@ spring:
     name: API-GATEWAY
   cloud:
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
       routes:
         - id: auth-service
           uri: lb://QUANTITY-SERVICE
