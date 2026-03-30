@@ -35,19 +35,19 @@ jobs:
             # ServiceRegistry
             cd ServiceRegistry
             ./mvnw clean package -DskipTests
-            nohup java -jar target/*.jar --server.port=8761 > ~/logs/service-registry.log 2>&1 &
+            nohup java -jar target/*.jar  > ~/logs/service-registry.log 2>&1 &
             cd ..
             sleep 10
             
             # QuantityMeasurementApp
             cd QuantityMeasurementApp
             ./mvnw clean package -DskipTests
-            nohup java -jar target/*.jar --server.port=8081 > ~/logs/quantity-app.log 2>&1 &
+            nohup java -jar target/*.jar  > ~/logs/quantity-app.log 2>&1 &
             cd ..
             sleep 5
             
             # ApiGateway
             cd ApiGateway
             ./mvnw clean package -DskipTests
-            nohup java -jar target/*.jar --server.port=8080 > ~/logs/api-gateway.log 2>&1 &
+            nohup java -jar target/*.jar  > ~/logs/api-gateway.log 2>&1 &
             cd ..
